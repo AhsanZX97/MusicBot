@@ -15,7 +15,8 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+    if message.content.startswith('?create '):
+        msg = message.content[8:]
+        await message.channel.send(msg)
 
 client.run(DISCORD_TOKEN)

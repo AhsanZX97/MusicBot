@@ -1,15 +1,18 @@
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 from apikey import SPOTIPY_CLIENT_ID,SPOTIPY_CLIENT_SECRET
 import spotipy.util as util
 import json
 
 import pprint
 
-client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
-token = client_credentials_manager.get_access_token()
-sp = spotipy.Spotify(auth=token)
-print(sp.me())
+#client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET,)
+#token = client_credentials_manager.get_access_token()
+
+sp = spotipy.Spotify(auth="BQCrvPkmx6EHjdPr8Rncct4DR1S7IowvDoQqtcg47Mw7ScmYdoVYDi")
+
+print(sp.search(q='offset', limit=1,type='artist'))
+
 #sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
 
 #results = sp.search(q='offset', limit=1,type='artist')
