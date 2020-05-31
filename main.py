@@ -31,5 +31,10 @@ async def on_message(message):
         else:
             playlist = sp.user_playlist_create(user="kingpiccy",name=msg,public=True)
             await message.channel.send("Playlist created: " + playlist['external_urls']['spotify'])
+    if message.content.startswith('?add '):
+        msg = message.content[5:]
+        track = sp.search(q=msg, limit=1,type='track')
+        track_uri = [ track['tracks']['items'][0]['uri'] ]
+        sp.user_playlist_add_tracks("kingpiccy", playlist['id'], track_uri)
 
 client.run(DISCORD_TOKEN)
