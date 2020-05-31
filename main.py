@@ -11,12 +11,16 @@ global sp, token, playlist
 token = util.prompt_for_user_token("kingpiccy","playlist-modify-public playlist-modify-private",client_id=SPOTIPY_CLIENT_ID,client_secret=SPOTIPY_CLIENT_SECRET,redirect_uri='http://localhost:8080/') 
 sp = spotipy.Spotify(auth=token)
 
+playlist = None
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 @client.event
 async def on_message(message):
+    global playlist
+
     if message.author == client.user:
         return
 
@@ -27,9 +31,5 @@ async def on_message(message):
         else:
             playlist = sp.user_playlist_create(user="kingpiccy",name=msg,public=True)
             await message.channel.send("Playlist created: " + playlist['external_urls']['spotify'])
-    if message.content.startswith('?id '):
-        await message.channel.send(playlist['id'])
-
-        
 
 client.run(DISCORD_TOKEN)
