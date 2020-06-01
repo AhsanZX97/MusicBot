@@ -53,7 +53,7 @@ async def on_message(message):
         else:
             msg = message.content[8:]
             track = sp.search(q=msg, limit=1,type='track')
-            track_uri = [ track['tracks']['items'][0]['uri'] ]
+            track_uri = [ { "uri": track['tracks']['items'][0]['uri'], "positions": [0] } ]
             sp.user_playlist_remove_specific_occurrences_of_tracks("kingpiccy",playlist['id'],track_uri)
             await message.channel.send("Song removed")
 
