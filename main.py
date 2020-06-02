@@ -56,5 +56,11 @@ async def on_message(message):
             track_uri = [ track['tracks']['items'][0]['uri'] ]
             sp.user_playlist_remove_all_occurrences_of_tracks("kingpiccy",playlist['id'],track_uri)
             await message.channel.send("Song removed")
+    if message.content.startswith('?search '):
+        msg = message.content[8:].rstrip()
+        playlists = sp.current_user_playlists(limit = 10, offset=0)['items']
+        for p in playlists:
+            if p['name'] == msg:
+                await message.channel.send(p['external_urls']['spotify'])
 
 client.run(DISCORD_TOKEN)
