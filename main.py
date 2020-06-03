@@ -62,14 +62,30 @@ async def on_message(message):
                 track_uri = [ track['tracks']['items'][0]['uri'] ]
                 sp.user_playlist_remove_all_occurrences_of_tracks("kingpiccy",playlist['id'],track_uri)
                 await message.channel.send("Song removed")
-    if message.content.startswith('?search '):
-        msg = message.content[8:].strip()
+    if message.content.startswith('?view '):
+        msg = message.content[6:].strip()
         playlists = sp.current_user_playlists(limit = 50, offset=0)['items']
         found = False
         for p in playlists:
             if p['name'] == msg:
                 found = True
                 await message.channel.send(p['external_urls']['spotify'])
+        if found == False:
+            await message.channel.send('Playlist not found')
+    if message.content == '?current':
+        if playlist is None:
+            await message.channel.send("No playlist in session")
+        else:
+            await message.channel.send("Current playlist in session: " + playlist['external_urls']['spotify'])
+    if message.content.startswith('?modify '):
+        msg = message.content[8:].strip()
+        playlists = sp.current_user_playlists(limit = 50, offset=0)['items']
+        found = False
+        for p in playlists:
+            if p['name'] == msg:
+                found = True
+                await message.channel.send("Now modifiying playlist: " + p['external_urls']['spotify'])
+                playlist = p
         if found == False:
             await message.channel.send('Playlist not found')
 
