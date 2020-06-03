@@ -26,7 +26,7 @@ async def on_message(message):
 
     if message.content.startswith('?create '):
         if playlist is None:
-            msg = message.content[8:]
+            msg = message.content[8:].strip()
             if len(msg) > 50:
                 await message.channel.send("playlist name needs to be less than 50 characters")
             else:
@@ -39,11 +39,14 @@ async def on_message(message):
         if playlist is None:
             await message.channel.send("No playlist in session")
         else:
-            msg = message.content[5:]
+            msg = message.content[5:].strip()
             track = sp.search(q=msg, limit=1,type='track')
-            track_uri = [ track['tracks']['items'][0]['uri'] ]
-            sp.user_playlist_add_tracks("kingpiccy", playlist['id'], track_uri)
-            await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
+            if len(track['tracks']['items']) == 0:
+                await message.channel.send("Song not found, learn to type you bozo")
+            else:
+                track_uri = [ track['tracks']['items'][0]['uri'] ]
+                sp.user_playlist_add_tracks("kingpiccy", playlist['id'], track_uri)
+                await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
     if message.content == '?end':
         await message.channel.send("Playlist adding session has been ended. Here is the final playlist: " + playlist['external_urls']['spotify'])
         playlist = None
@@ -53,14 +56,21 @@ async def on_message(message):
         else:
             msg = message.content[8:]
             track = sp.search(q=msg, limit=1,type='track')
-            track_uri = [ track['tracks']['items'][0]['uri'] ]
-            sp.user_playlist_remove_all_occurrences_of_tracks("kingpiccy",playlist['id'],track_uri)
-            await message.channel.send("Song removed")
+            if len(track['tracks']['items']) == 0:
+                await message.channel.send("Song not found")
+            else:
+                track_uri = [ track['tracks']['items'][0]['uri'] ]
+                sp.user_playlist_remove_all_occurrences_of_tracks("kingpiccy",playlist['id'],track_uri)
+                await message.channel.send("Song removed")
     if message.content.startswith('?search '):
-        msg = message.content[8:].rstrip()
-        playlists = sp.current_user_playlists(limit = 10, offset=0)['items']
+        msg = message.content[8:].strip()
+        playlists = sp.current_user_playlists(limit = 50, offset=0)['items']
+        found = False
         for p in playlists:
             if p['name'] == msg:
+                found = True
                 await message.channel.send(p['external_urls']['spotify'])
+        if found == False:
+            await message.channel.send('Playlist not found')
 
 client.run(DISCORD_TOKEN)
