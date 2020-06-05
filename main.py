@@ -9,14 +9,10 @@ client = discord.Client()
 
 global sp, token, playlist
 
-token = util.prompt_for_user_token("kingpiccy", "playlist-modify-public playlist-modify-private",
-                                   client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, redirect_uri='http://localhost:8080/')
+token = util.prompt_for_user_token("kingpiccy", "playlist-modify-public playlist-modify-private", client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, redirect_uri='http://localhost:8080/')
 sp = spotipy.Spotify(auth=token)
 
 playlist = None
-
-history = []
-
 
 @client.event
 async def on_ready():
@@ -25,18 +21,13 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    global playlist, history
+    global playlist
 
     if message.author == client.user:
         return
 
     if message.content == '?test':
-        posts = db.posts
-        post = {"author": "Mike",
-                "text": "My first blog post!",
-                "tags": ["mongodb", "python", "pymongo"]}
-        post_id = posts.insert_one(post).inserted_id
-        await message.channel.send(post_id)
+        await message.channel.send(db)
 
     if message.content.startswith('?create '):
         if playlist is None:
@@ -46,7 +37,8 @@ async def on_message(message):
             else:
                 playlist = sp.user_playlist_create(
                     user="kingpiccy", name=msg, public=True)
-                history.append({'id': playlist['id']})
+                info = {'id': playlist['id']}
+                db.history.insert_one(info)
                 await message.channel.send("Playlist created: " + playlist['external_urls']['spotify'])
                 await message.channel.send("type ?end to end this playlist adding session")
         else:
