@@ -55,6 +55,8 @@ async def on_message(message):
                 track_uri = [track['tracks']['items'][0]['uri']]
                 sp.user_playlist_add_tracks(
                     "kingpiccy", playlist['id'], track_uri)
+                user = { '$set': {'users': [ {'id': message.author.id, 'song': [track_uri] }]}}
+                db.history.update_one({'id' : playlist['id']},user)
                 await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
 
     if message.content == '?end':
@@ -71,7 +73,7 @@ async def on_message(message):
             else:
                 track_uri = [track['tracks']['items'][0]['uri']]
                 sp.user_playlist_remove_all_occurrences_of_tracks(
-                    "kingpiccy", playlist['id'], track_uri)
+                    "kingpiccy", playlist['id'], track_uri[0])
                 await message.channel.send("Song removed")
     if message.content.startswith('?view '):
         msg = message.content[6:].strip()
