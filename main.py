@@ -27,7 +27,7 @@ async def on_message(message):
         return
 
     if message.content == '?test':
-        await message.channel.send(db)
+        await message.channel.send(db.list_collection_names())
 
     if message.content.startswith('?create '):
         if playlist is None:
@@ -37,7 +37,7 @@ async def on_message(message):
             else:
                 playlist = sp.user_playlist_create(
                     user="kingpiccy", name=msg, public=True)
-                info = {'id': playlist['id']}
+                info = {'id': playlist['id'], 'users': []}
                 db.history.insert_one(info)
                 await message.channel.send("Playlist created: " + playlist['external_urls']['spotify'])
                 await message.channel.send("type ?end to end this playlist adding session")
