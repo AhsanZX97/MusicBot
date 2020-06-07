@@ -55,8 +55,18 @@ async def on_message(message):
                 track_uri = [track['tracks']['items'][0]['uri']]
                 sp.user_playlist_add_tracks(
                     "kingpiccy", playlist['id'], track_uri)
-                user = { '$set': {'users': [ {'id': message.author.id, 'song': [track_uri] }]}}
-                db.history.update_one({'id' : playlist['id']},user)
+                users = db.history.find_one({'id': playlist['id']})['users']
+                addUser = {}
+                notFound = True
+                for user in users:
+                    if user['id'] == message.author.id:
+                        notFound = False 
+                        user['song'].append(track_uri[0])
+                        addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [user['song']] }]}}
+                if notFound:
+                    addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [track_uri[0]] }]}}
+                print(addUser)
+                db.history.update_one({'id' : playlist['id']},addUser)
                 await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
 
     if message.content == '?end':
