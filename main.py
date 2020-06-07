@@ -60,9 +60,13 @@ async def on_message(message):
                 notFound = True
                 for user in users:
                     if user['id'] == message.author.id:
-                        notFound = False 
-                        user['song'].append(track_uri[0])
-                        addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [user['song']] }]}}
+                        if len(user['song']) >= 3:
+                            await message.channel.send("You have already added 3 songs to the playlist")
+                            return
+                        else:
+                            notFound = False 
+                            user['song'].append(track_uri[0])
+                            addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [user['song']] }]}}
                 if notFound:
                     addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [track_uri[0]] }]}}
                 print(addUser)
