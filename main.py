@@ -72,7 +72,8 @@ async def on_message(message):
                     addUser = {
                         '$set': {'users': [{'id': message.author.id, 'song': [track_uri[0]]}]}}
                 db.history.update_one({'id': playlist['id']}, addUser)
-                sp.user_playlist_add_tracks("kingpiccy", playlist['id'], track_uri)
+                sp.user_playlist_add_tracks(
+                    "kingpiccy", playlist['id'], track_uri)
                 await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
 
     if message.content == '?end':
@@ -83,14 +84,29 @@ async def on_message(message):
             await message.channel.send("No playlist in session")
         else:
             msg = message.content[8:].strip()
-            track = sp.search(q=msg, limit=1, type='track')
-            if len(track['tracks']['items']) == 0:
-                await message.channel.send("Song not found")
-            else:
-                track_uri = [track['tracks']['items'][0]['uri']]
-                sp.user_playlist_remove_all_occurrences_of_tracks(
-                    "kingpiccy", playlist['id'], track_uri[0])
-                await message.channel.send("Song removed")
+            if msg not in ["1", "2", "3"]:
+                await message.channel.send("To remove a track, specify the order of number you want to remove. e.g 1 is the first track you added and 3 is the last")
+                return
+            num = int(msg)
+            users = db.history.find_one({'id': playlist['id']})['users']
+            addUser = {}
+            uri = ""
+            notFound = True
+            for user in users:
+                if user['id'] == message.author.id:
+                    notFound = False
+                    if num > len(user['song']):
+                        await message.channel.send("You haven't added " + num + "songs")
+                        return
+                    uri = user['song'][num-1] # spotipy.exceptions.SpotifyException: http status: 400, code:-1 - https://api.spotify.com/v1/users/kingpiccy/playlists/1I4yio3w1G34CpbgIqeCNX/tracks: JSON body contains an invalid track uri: spotify:track:s
+                    del user['song'][num-1]
+                    addUser = {'$set': {'users': [{'id': message.author.id, 'song': user['song']}]}}
+            if notFound:
+                await message.channel.send("You haven't even added a track")
+                return
+            db.history.update_one({'id': playlist['id']}, addUser)
+            sp.user_playlist_remove_all_occurrences_of_tracks("kingpiccy", playlist['id'], uri)
+            await message.channel.send("Song removed")
     if message.content.startswith('?view '):
         msg = message.content[6:].strip()
         playlists = sp.current_user_playlists(limit=50, offset=0)['items']
