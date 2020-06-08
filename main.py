@@ -9,10 +9,12 @@ client = discord.Client()
 
 global sp, token, playlist
 
-token = util.prompt_for_user_token("kingpiccy", "playlist-modify-public playlist-modify-private", client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, redirect_uri='http://localhost:8080/')
+token = util.prompt_for_user_token("kingpiccy", "playlist-modify-public playlist-modify-private",
+                                   client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, redirect_uri='http://localhost:8080/')
 sp = spotipy.Spotify(auth=token)
 
 playlist = None
+
 
 @client.event
 async def on_ready():
@@ -53,8 +55,6 @@ async def on_message(message):
                 await message.channel.send("Song not found, learn to type you bozo")
             else:
                 track_uri = [track['tracks']['items'][0]['uri']]
-                sp.user_playlist_add_tracks(
-                    "kingpiccy", playlist['id'], track_uri)
                 users = db.history.find_one({'id': playlist['id']})['users']
                 addUser = {}
                 notFound = True
@@ -64,13 +64,15 @@ async def on_message(message):
                             await message.channel.send("You have already added 3 songs to the playlist")
                             return
                         else:
-                            notFound = False 
+                            notFound = False
                             user['song'].append(track_uri[0])
-                            addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [user['song']] }]}}
+                            addUser = {
+                                '$set': {'users': [{'id': message.author.id, 'song': user['song']}]}}
                 if notFound:
-                    addUser = { '$set': {'users': [ {'id': message.author.id, 'song': [track_uri[0]] }]}}
-                print(addUser)
-                db.history.update_one({'id' : playlist['id']},addUser)
+                    addUser = {
+                        '$set': {'users': [{'id': message.author.id, 'song': [track_uri[0]]}]}}
+                db.history.update_one({'id': playlist['id']}, addUser)
+                sp.user_playlist_add_tracks("kingpiccy", playlist['id'], track_uri)
                 await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
 
     if message.content == '?end':
@@ -80,7 +82,7 @@ async def on_message(message):
         if playlist is None:
             await message.channel.send("No playlist in session")
         else:
-            msg = message.content[8:]
+            msg = message.content[8:].strip()
             track = sp.search(q=msg, limit=1, type='track')
             if len(track['tracks']['items']) == 0:
                 await message.channel.send("Song not found")
