@@ -98,7 +98,7 @@ async def on_message(message):
                     if num > len(user['song']):
                         await message.channel.send("You haven't added " + num + "songs")
                         return
-                    uri = user['song'][num-1] # spotipy.exceptions.SpotifyException: http status: 400, code:-1 - https://api.spotify.com/v1/users/kingpiccy/playlists/1I4yio3w1G34CpbgIqeCNX/tracks: JSON body contains an invalid track uri: spotify:track:s
+                    uri = [user['song'][num-1]] # spotipy.exceptions.SpotifyException: http status: 400, code:-1 - https://api.spotify.com/v1/users/kingpiccy/playlists/1I4yio3w1G34CpbgIqeCNX/tracks: JSON body contains an invalid track uri: spotify:track:s
                     del user['song'][num-1]
                     addUser = {'$set': {'users': [{'id': message.author.id, 'song': user['song']}]}}
             if notFound:
