@@ -1,7 +1,7 @@
 import sys
 import spotipy
 import spotipy.util as util
-from apikey import SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, DISCORD_TOKEN
+from apikey import SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, DISCORD_TOKEN, USERNAME
 import discord
 from db import db
 
@@ -29,10 +29,10 @@ async def on_message(message):
         return
 
     if message.content == '?test':
-        await message.channel.send(db.list_collection_names())
+        await message.channel.send()
 
     if message.content.startswith('?create '):
-        if playlist is None:
+        if playlist is None and message.author == USERNAME:
             msg = message.content[8:].strip()
             if len(msg) > 50:
                 await message.channel.send("playlist name needs to be less than 50 characters")
@@ -80,9 +80,10 @@ async def on_message(message):
                 await message.channel.send("Song added: " + track['tracks']['items'][0]['external_urls']['spotify'])
 
     if message.content == '?end':
-        await message.channel.send("Playlist adding session has been ended. Here is the final playlist: " + playlist['external_urls']['spotify'])
-        playlist = None
-        total = 0
+        if message.author == USERNAME:
+            await message.channel.send("Playlist adding session has been ended. Here is the final playlist: " + playlist['external_urls']['spotify'])
+            playlist = None
+            total = 0
     if message.content.startswith('?remove '):
         if playlist is None:
             await message.channel.send("No playlist in session")
