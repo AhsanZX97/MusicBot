@@ -28,6 +28,8 @@ async def on_message(message):
         return
 
     if "music.apple.com" in message.content:
-        await message.channel.send(message.embeds[0])
+        await message.channel.send(len(message.embeds))
+        for embed in message.embeds:
+            await message.channel.send(embed.title.split(" ").join("%20").split("%20by%20"))
 
 client.run(DISCORD_TOKEN)
